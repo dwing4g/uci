@@ -7,7 +7,7 @@ rem ffmpeg: git://source.ffmpeg.org/ffmpeg.git
 rem ./configure --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-lto --disable-debug
 
 set MINGW_HOME=C:\mingw32
-set FFMPEG_HOME=D:\svn\ffmpeg
+set FFMPEG_HOME=D:\git\ffmpeg
 rem set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45
 
 set GCCEXE=%MINGW_HOME%\bin\gcc.exe
