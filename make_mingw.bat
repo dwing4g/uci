@@ -3,6 +3,8 @@ setlocal
 mode con cols=120 lines=3000
 pushd %~dp0
 
+rem mingw-gcc: http://files.1f0.de/mingw/
+rem jdk: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 rem ffmpeg: git://source.ffmpeg.org/ffmpeg.git
 rem ./configure --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-lto --disable-debug
 
