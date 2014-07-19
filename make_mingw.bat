@@ -21,8 +21,8 @@ set AVCODEC_HOME=%FFMPEG_HOME%\libavcodec
 set AVUTIL_HOME=%FFMPEG_HOME%\libavutil
 set AVSWSCALE_HOME=%FFMPEG_HOME%\libswscale
 set JDK_HOME=%JAVA_HOME%
-rem set FLTO=
-set FLTO=-flto -fwhole-program
+set FLTO=
+rem set FLTO=-flto -fwhole-program
 
 set GCC1=%GCCEXE% -m32 -std=gnu99 -pipe -static -shared -march=i686 -Ofast -ffast-math -fweb -fomit-frame-pointer -fmerge-all-constants -s -w -Wl,--image-base,0x10000000 -Wl,--kill-at -DNDEBUG -DHAVE_AV_CONFIG_H -I. "-I%FFMPEG_HOME%" "-I%AVCODEC_HOME%" "-I%AVUTIL_HOME%" "-I%AVSWSCALE_HOME%" "-I%JDK_HOME%\include" "-I%JDK_HOME%\include\win32"
 
