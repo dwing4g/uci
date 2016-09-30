@@ -9,9 +9,9 @@ rem ffmpeg: git://source.ffmpeg.org/ffmpeg.git
 rem ./configure --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-lto --disable-debug --disable-dxva2 --disable-iconv
 rem config.mak: CFLAGS=... -Ofast -ffat-lto-objects ...
 
-set MINGW_HOME=C:\mingw32
-set FFMPEG_HOME=D:\git\ffmpeg
-rem set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45
+set MINGW_HOME=D:\mingw
+set FFMPEG_HOME=D:\ffmpeg-3.1.3
+rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_102
 
 set GCCEXE=%MINGW_HOME%\bin\gcc.exe
 set GPPEXE=%MINGW_HOME%\bin\g++.exe
@@ -24,7 +24,7 @@ set JDK_HOME=%JAVA_HOME%
 rem set FLTO=
 set FLTO=-flto -fwhole-program
 
-set GCC1=%GCCEXE% -m32 -std=gnu99 -pipe -static -shared -march=i686 -Ofast -ffast-math -fweb -fomit-frame-pointer -fmerge-all-constants -s -w -Wl,--image-base,0x10000000 -Wl,--kill-at -DNDEBUG -DHAVE_AV_CONFIG_H -I. "-I%FFMPEG_HOME%" "-I%AVCODEC_HOME%" "-I%AVUTIL_HOME%" "-I%AVSWSCALE_HOME%" "-I%JDK_HOME%\include" "-I%JDK_HOME%\include\win32"
+set GCC1=%GCCEXE% -m32 -std=gnu99 -pipe -static -shared -march=i686 -Ofast -ffast-math -fweb -fomit-frame-pointer -fmerge-all-constants -s -w -Wl,--image-base,0x10000000 -Wl,--kill-at -DNDEBUG -DHAVE_AV_CONFIG_H -I. "-I%JDK_HOME%\include" "-I%JDK_HOME%\include\win32" "-I%FFMPEG_HOME%" "-I%AVCODEC_HOME%" "-I%AVUTIL_HOME%" "-I%AVSWSCALE_HOME%"
 
 rem step 1/2: -fprofile-generate
 rem step 2/2: -fprofile-use

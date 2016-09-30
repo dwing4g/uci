@@ -67,7 +67,8 @@ __forceinline void RemoveInfo(Buffer& buffer)
 // 返回<0表示错误,>=0表示输出长度,输出的*dst_yuv,*dst_alpha要用free释放内存
 __forceinline int BMP2YUV(const void* src, int srclen, void** dst_yuv, void** dst_alpha, int* width, int* height, char yuv444)
 {
-	if(!dst_yuv || !dst_alpha || !width || !height) return -1; *dst_yuv = *dst_alpha = 0; *width = *height = 0;
+	if(!dst_yuv || !dst_alpha || !width || !height) return -1;
+	*dst_yuv = *dst_alpha = 0; *width = *height = 0;
 	if(!src || srclen < 0x1d) return -2;
 	if(memcmp(src, "BM", 2)) return -3;
 	const int srcbase = *(int*)((const U8*)src + 0x0a);

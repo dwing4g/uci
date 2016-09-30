@@ -126,7 +126,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	}
 
 	EnterCriticalSection(&g_cs);
-	if(!g_frame && !(g_frame = avcodec_alloc_frame()))							{ ret = -20; goto end_; }
+	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
 	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -21; goto end_; }
 	g_context->flags &= ~CODEC_FLAG_EMU_EDGE;
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
@@ -140,7 +140,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
-	bit10 = ((H264Context*)g_context->priv_data)->sps.bit_depth_luma;
+	bit10 = ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma;
 	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
 
 	if(m != 1)
@@ -379,7 +379,7 @@ static int __stdcall UCIDecode4XnView(
 	}
 
 	EnterCriticalSection(&g_cs);
-	if(!g_frame && !(g_frame = avcodec_alloc_frame()))							{ ret = -20; goto end_; }
+	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
 	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -21; goto end_; }
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 	if(avcodec_open2(g_context, &ff_h264_decoder, 0) < 0)						{ ret = -22; goto end_; }
@@ -391,7 +391,7 @@ static int __stdcall UCIDecode4XnView(
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
-	bit10 = ((H264Context*)g_context->priv_data)->sps.bit_depth_luma;
+	bit10 = ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma;
 	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
 
 	if(m != 1)
