@@ -1,4 +1,4 @@
 #pragma once
 
-#define UCI_VERSION	L"0.526"
-#define UCI_DATE	L"2016-09-30"
+#define UCI_VERSION	L"0.6"
+#define UCI_DATE	L"2016-10-09"

@@ -5,7 +5,8 @@
 #include <string.h>
 #include <jni.h>
 #include "libavcodec/avcodec.h"
-#include "libavcodec/h264.h"
+//#include "libavcodec/h264.h"
+//#include "libavcodec/hevc.h"
 #include "libswscale/swscale.h"
 #include "libswscale/swscale_internal.h"
 #include "color1.h"
@@ -45,6 +46,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	int*		bit)	// 输出图像的bpp值(每像素位数)
 {
 	extern AVCodec ff_h264_decoder;
+	extern AVCodec ff_hevc_decoder;
 	int ret = 0;
 	U8* frame0 = 0;
 	U8* frame1 = 0;
@@ -55,6 +57,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	int size, hasimg, bit10;
 	U8* psrc, *pdst;
 	const U8* srcend = (const U8*)src + srclen;
+	AVCodec* ff_decoder = &ff_h264_decoder;
 
 	if(dst	 ) *dst    = 0;
 	if(stride) *stride = 0;
@@ -74,6 +77,10 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	case 0x21:	b = 32; m = 2; break; // full range, YUV420+A
 	case 0x40:	b = 24; m = 3; break; // full range, YUV444
 	case 0x41:	b = 32; m = 3; break; // full range, YUV444+A
+	case 0x60:	b = 24; m = 2; ff_decoder = &ff_hevc_decoder; break; // full range, YUV420
+	case 0x61:	b = 32; m = 2; ff_decoder = &ff_hevc_decoder; break; // full range, YUV420+A
+	case 0x70:	b = 24; m = 3; ff_decoder = &ff_hevc_decoder; break; // full range, YUV444
+	case 0x71:	b = 32; m = 3; ff_decoder = &ff_hevc_decoder; break; // full range, YUV444+A
 	default: return -4;
 	}
 	w = *(int*)((U8*)src + 4);
@@ -127,10 +134,10 @@ __declspec(dllexport) int __stdcall UCIDecode(
 
 	EnterCriticalSection(&g_cs);
 	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
-	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -21; goto end_; }
+	if(!g_context && !(g_context = avcodec_alloc_context3(ff_decoder)))			{ ret = -21; goto end_; }
 	g_context->flags &= ~CODEC_FLAG_EMU_EDGE;
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-	if(avcodec_open2(g_context, &ff_h264_decoder, 0) < 0)						{ ret = -22; goto end_; }
+	if(avcodec_open2(g_context, ff_decoder, 0) < 0)								{ ret = -22; goto end_; }
 	g_context->flags &= ~CODEC_FLAG_EMU_EDGE;
 	g_packet.data = frame_data[0];
 	g_packet.size = frame_size[0];
@@ -140,8 +147,10 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
-	bit10 = ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma;
-	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
+	bit10 = (g_context->pix_fmt == AV_PIX_FMT_YUV420P10LE || g_context->pix_fmt == AV_PIX_FMT_YUV444P10LE);
+//	bit10 = (ff_decoder == &ff_h264_decoder ? ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma : ((HEVCContext*)g_context->priv_data)->ps.sps->bit_depth);
+//	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
+//	printf("fmt: %d %d\n", (int)bit10, (int)g_context->pix_fmt);
 
 	if(m != 1)
 	{
@@ -188,9 +197,9 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(b == 32)
 	{
 		avcodec_close(g_context);
-		if(!(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -40; goto end_; }
+		if(!(g_context = avcodec_alloc_context3(&ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-		if(avcodec_open2(g_context, &ff_h264_decoder, 0) < 0)	{ ret = -41; goto end_; }
+		if(avcodec_open2(g_context, &ff_decoder, 0) < 0)		{ ret = -41; goto end_; }
 		g_packet.data = frame_data[3];
 		g_packet.size = frame_size[3];
 		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -245,6 +254,7 @@ BOOL __stdcall DllMain(HMODULE hm, DWORD reason, LPVOID dummy)
 	if(reason == DLL_PROCESS_ATTACH)
 	{
 		extern AVCodec ff_h264_decoder;
+		extern AVCodec ff_hevc_decoder;
 		DisableThreadLibraryCalls(hm);
 		InitializeCriticalSection(&g_cs);
 		av_log_set_level(AV_LOG_PANIC);
@@ -254,6 +264,7 @@ BOOL __stdcall DllMain(HMODULE hm, DWORD reason, LPVOID dummy)
 		g_packet.dts = AV_NOPTS_VALUE;
 		g_packet.pos = -1;
 		avcodec_register(&ff_h264_decoder);
+		avcodec_register(&ff_hevc_decoder);
 	}
 	else if(reason == DLL_PROCESS_DETACH)
 	{
@@ -298,6 +309,7 @@ static int __stdcall UCIDecode4XnView(
 	int*		bit)	// 输出图像的bpp值(每像素位数)
 {
 	extern AVCodec ff_h264_decoder;
+	extern AVCodec ff_hevc_decoder;
 	int ret = 0;
 	U8* frame0 = 0;
 	U8* frame1 = 0;
@@ -308,6 +320,7 @@ static int __stdcall UCIDecode4XnView(
 	int size, hasimg, bit10;
 	U8* psrc, *pdst;
 	const U8* srcend = (const U8*)src + srclen;
+	AVCodec* ff_decoder = &ff_h264_decoder;
 
 	if(dst	 ) *dst    = 0;
 	if(stride) *stride = 0;
@@ -327,6 +340,10 @@ static int __stdcall UCIDecode4XnView(
 	case 0x21:	b = 32; m = 2; break; // full range, YUV420+A
 	case 0x40:	b = 24; m = 3; break; // full range, YUV444
 	case 0x41:	b = 32; m = 3; break; // full range, YUV444+A
+	case 0x60:	b = 24; m = 2; ff_decoder = &ff_hevc_decoder; break; // full range, YUV420
+	case 0x61:	b = 32; m = 2; ff_decoder = &ff_hevc_decoder; break; // full range, YUV420+A
+	case 0x70:	b = 24; m = 3; ff_decoder = &ff_hevc_decoder; break; // full range, YUV444
+	case 0x71:	b = 32; m = 3; ff_decoder = &ff_hevc_decoder; break; // full range, YUV444+A
 	default: return -4;
 	}
 	w = *(int*)((U8*)src + 4);
@@ -380,9 +397,9 @@ static int __stdcall UCIDecode4XnView(
 
 	EnterCriticalSection(&g_cs);
 	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
-	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -21; goto end_; }
+	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_decoder)))		{ ret = -21; goto end_; }
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-	if(avcodec_open2(g_context, &ff_h264_decoder, 0) < 0)						{ ret = -22; goto end_; }
+	if(avcodec_open2(g_context, &ff_decoder, 0) < 0)							{ ret = -22; goto end_; }
 	g_packet.data = frame_data[0];
 	g_packet.size = frame_size[0];
 	size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -391,8 +408,9 @@ static int __stdcall UCIDecode4XnView(
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
-	bit10 = ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma;
-	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
+	bit10 = (g_context->pix_fmt == AV_PIX_FMT_YUV420P10LE || g_context->pix_fmt == AV_PIX_FMT_YUV444P10LE);
+//	bit10 = (ff_decoder == &ff_h264_decoder ? ((H264Context*)g_context->priv_data)->ps.sps->bit_depth_luma : ((HEVCContext*)g_context->priv_data)->ps.sps->bit_depth);
+//	if(bit10 == 8) bit10 = 0; else if(bit10 != 10)								{ ret = -27; goto end_; }
 
 	if(m != 1)
 	{
@@ -440,9 +458,9 @@ static int __stdcall UCIDecode4XnView(
 	if(b == 32)
 	{
 		avcodec_close(g_context);
-		if(!(g_context = avcodec_alloc_context3(&ff_h264_decoder)))	{ ret = -40; goto end_; }
+		if(!(g_context = avcodec_alloc_context3(&ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-		if(avcodec_open2(g_context, &ff_h264_decoder, 0) < 0)	{ ret = -41; goto end_; }
+		if(avcodec_open2(g_context, &ff_decoder, 0) < 0)		{ ret = -41; goto end_; }
 		g_packet.data = frame_data[3];
 		g_packet.size = frame_size[3];
 		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);

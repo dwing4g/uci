@@ -1,21 +1,21 @@
-﻿UCI (Ultra Compact Image) 0.526 by dwing 2016-09-??
+﻿UCI (Ultra Compact Image) 0.6 by dwing 2016-10-09
 
 
 * 简介
 
-UCI是一种基于H.264 intra帧压缩算法和数据流格式的静态图像封装格式.
+UCI是一种基于H.264/HEVC intra帧压缩算法和数据流格式的静态图像封装格式.
 而且不受图像宽高的一些限制,支持alpha透明通道等特性,
 与JPEG,JPEG2000,HD-Photo等静态图像压缩算法相比具有更高的压缩效率.
 
 目前公开的命令行工具暂时只支持24/32位BMP与UCI格式的相互转换,
-编码工具只支持x264作为编码内核,
+编码工具只支持x264/x265作为编码内核,
 解码内核使用FFmpeg中的libavcodec解码器.
 
 命令行使用方法详见ucienc/ucidec无参数时输出的帮助信息.
 
 
 * 文件
-ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe作为编码内核,可在x264.nl网站上下载到最新版本)
+ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe/x265.exe作为编码内核,可在x264.nl/x265.ru网站上下载到最新版本)
 ucidec.exe  --- 解码工具,支持UCI=>BMP的转换(需要ucidec.dll内核)
 ucidec.dll  --- 解码内核,可用于二次开发
                 改名为Xuci.usr并放入XnView的Plugins目录中即可作为XnView读取UCI图像的插件
@@ -66,7 +66,7 @@ void __stdcall UCIDebug(int level);
 
 + 此版本是公开测试版本,可以免费用于非赢利用途,dwing不承担任何本软件导致的直接或间接不利后果和风险责任
 + 解码内核版权归FFmpeg所有
-+ H.264标准归JVT(ITU-T&MPEG)所有
++ H.264/HEVC标准归JVT(ITU-T&MPEG)所有
 
 
 * 联系
@@ -79,7 +79,8 @@ void __stdcall UCIDebug(int level);
 
 * 更新历史(以下版本的UCI格式及解码器均向后兼容)
 
-0.526(2016-09-??) 更新FFmpeg至3.1.3,使用MinGW-GCC 6.2编译
+0.6  (2016-10-09) 支持x265编码
+0.526(2016-09-30) 更新FFmpeg至3.1.3,使用MinGW-GCC 6.2编译
 0.525(2013-12-20) 更新FFmpeg,使用MinGW-GCC 4.8.2编译,发布五周年开源纪念版
 0.524(2013-05-17) 更新FFmpeg,命令行程序使用unicode处理所有字符串
 0.523(2013-04-28) 更新FFmpeg,修正上个版本解码的色彩空间转换问题

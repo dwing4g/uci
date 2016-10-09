@@ -20,8 +20,10 @@
 	#endif
 #endif
 
-#define DEFAULT_OPT L"-b 0 -r 0 -m 11 -t 2 --aq-mode 2 --no-psy --threads 1"
-#define DEFAULT_CRF 27
+#define DEFAULT_X264_OPT L"-b 0 -r 0 -m 11 -t 2 --aq-mode 2 --no-psy --threads 1"
+#define DEFAULT_X265_OPT L"--bframes 0 --ref 1 -m 7 --aq-mode 2 --no-psy-rd"
+#define DEFAULT_X264_CRF 27
+#define DEFAULT_X265_CRF 43
 
 // extern "C" int __sse2_available = 0;
 
@@ -33,32 +35,56 @@ __forceinline void FixY(void* dst, int dstlen)
 		if(*pdst < 255) ++*pdst;
 }
 
-__forceinline void RemoveInfo(Buffer& buffer)
+__forceinline void RemoveInfo(Buffer& buffer, char x265_mode)
 {
 	if(buffer.size() >= 0x100)
 	{
-		U8 head[0x48];
-		for(int i = 0; i < 5; ++i) head[i] = buffer[i];
-		for(int i = 0; i < 0x40; ++i)
+		U8 head[0x70];
+		for(int i = 0; i < 6; ++i) head[i] = buffer[i];
+		for(int i = 0; i < 0x60; ++i)
 		{
-			head[i + 5] = buffer[i + 5];
-			if(!memcmp(head + i, "\x00\x00\x01\x06\x05\xff", 6))	// 00 00 01 06 05 FF
+			head[i + 6] = buffer[i + 6];
+			if(x265_mode)
+			{
+				U32 len = 7;
+				if(!memcmp(head + i, "\x00\x00\x01\x4e\x01\x05\xff", len))	// 00 00 01 4E 01 05 FF
+				{
+					for(int j = i + len - 1;; ++j)
+					{
+						U32 n = buffer[j];
+						len += n + 1;
+						if(n < 255) break;
+					}
+					if(i == 1)
+						buffer.skip(len + 1);
+					else
+					{
+						buffer.skip(len);
+						while(--i >= 0) buffer.set(i, head[i]);
+					}
+					break;
+				}
+			}
+			else
 			{
 				U32 len = 6;
-				for(int j = i + 5;; ++j)
+				if(!memcmp(head + i, "\x00\x00\x01\x06\x05\xff", len))	// 00 00 01 06 05 FF
 				{
-					U8 n = buffer[j];
-					len += n + 1;
-					if(n < 255) break;
+					for(int j = i + len - 1;; ++j)
+					{
+						U32 n = buffer[j];
+						len += n + 1;
+						if(n < 255) break;
+					}
+					if(i == 1)
+						buffer.skip(len + 1);
+					else
+					{
+						buffer.skip(len);
+						while(--i >= 0) buffer.set(i, head[i]);
+					}
+					break;
 				}
-				if(i == 1)
-					buffer.skip(len + 1);
-				else
-				{
-					buffer.skip(len);
-					while(--i >= 0) buffer.set(i, head[i]);
-				}
-				break;
 			}
 		}
 	}
@@ -194,7 +220,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	U8* temp = 0;
 	int srclen, dstlen;
 	int w = 0, h = 0, ww, hh;
-	float q0 = DEFAULT_CRF;
+	float q0 = DEFAULT_X264_CRF;
 	float q1 = -1.0f;
 	const wchar_t* opt0 = 0;
 	const wchar_t* opt1 = 0;
@@ -207,6 +233,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	char is_quiet = 0;
 	char yuv_out_10bit = 0;
 	char yuv_in_10bit = 0;
+	char x265_mode = 0;
 	int yuv_out = 0;	// 1:yuv420 2:yuv444
 	int yuv_in = 0; 	// 1:yuv420 2:yuv444
 	char buf[0x20];
@@ -226,6 +253,12 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 				ret = -1; goto end_;
 			}
 			wcsncpy(dstname, argv[i], sizeof(dstname)/sizeof(*dstname) - 1);
+		}
+		else if(!wcscmp(argv[i], L"-x265"))
+		{
+			x265_mode = 1;
+			exe = L"x265.exe";
+			q0 = DEFAULT_X265_CRF;
 		}
 		else if(!wcscmp(argv[i], L"-q"))
 		{
@@ -383,15 +416,16 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		fwprintf(stderr,L"UCI (Ultra Compact Image) Encoder " UCI_VERSION L" [by dwing] " UCI_DATE L"\n"
 						L"Usage:   ucienc <src_file.bmp> [options]\n"
 						L"Options: -o <filename> set output file name, default: <src_file>.uci\n"
+						L"         -x265         use x265 instead of x264\n"
 						L"         -q <number>   set quality of RGB/YUV channel compression\n"
-						L"                       [0.0 ~ 51.0] (best ~ worst) default: %d\n"
+						L"                       [0.0 ~ 51.0] (best ~ worst) default: %d/%d\n"
 						L"         -Q <number>   set quality of alpha channel compression\n"
 						L"                       [0.0 ~ 51.0] (best ~ worst) default: same as -q\n"
-						L"         -x \"......\"   use custom detail x264 options for RGB/YUV channel\n"
+						L"         -x \"......\"   use custom detail x264/5 options for RGB/YUV channel\n"
 						L"                       ignore -q/-Q, use carefully\n"
-						L"         -X \"......\"   use custom detail x264 options for alpha channel\n"
+						L"         -X \"......\"   use custom detail x264/5 options for alpha channel\n"
 						L"                       ignore -q/-Q, use carefully, default: same as -x\n"
-						L"         -p <progname> set x264 program file name, default: x264.exe\n"
+						L"         -p <progname> set x264/5 program file name, default: x264/5.exe\n"
 						L"         -s            encode by YUV 4:4:4, default YUV 4:2:0\n"
 						L"         -o420         set output format in YUV 4:2:0 (ignore alpha channel)\n"
 						L"         -o444         set output format in YUV 4:4:4 (ignore alpha channel)\n"
@@ -399,14 +433,15 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 						L"         -i420 <w> <h> set input format in YUV 4:2:0, ignore -s,-o420,-o444\n"
 						L"         -i444 <w> <h> set input format in YUV 4:4:4, ignore -s,-o420,-o444\n"
 						L"         -i10b         set input format in YUV 10-bit, default: 8-bit\n"
-						L"         -info         reserve x264 mark and parameter info in UCI data\n"
-						L"         -quiet        suppress x264 message\n"
+						L"         -info         reserve x264/5 mark and parameter info in UCI data\n"
+						L"         -quiet        suppress x264/5 message\n"
 						L"Default: x264 option:  --crf %d %ls\n"
+						L"         x265 option:  --crf %d %ls\n"
 						L"Notes:   input file must be a 24 or 32 bit uncompressed BMP format file\n"
 						L"         specify - instead of filename to use stdin/stdout\n"
 						L"Examples:ucienc input.bmp -q 30 -Q 35\n"
 						L"         ucienc - -o output.uci -x \"-q 30\"\n",
-						DEFAULT_CRF, DEFAULT_CRF, DEFAULT_OPT);
+						DEFAULT_X264_CRF, DEFAULT_X265_CRF, DEFAULT_X264_CRF, DEFAULT_X264_OPT, DEFAULT_X265_CRF, DEFAULT_X265_OPT);
 		return 1;
 	}
 
@@ -576,11 +611,11 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(!yuv444)
 	{
-		if(!WriteFile(hfile, dst1 ? "UCI\x21" : "UCI\x20", 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -43; goto end_; }
+		if(!WriteFile(hfile, x265_mode ? (dst1 ? "UCI\x61" : "UCI\x60") : (dst1 ? "UCI\x21" : "UCI\x20"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -43; goto end_; }
 	}
 	else
 	{
-		if(!WriteFile(hfile, dst1 ? "UCI\x41" : "UCI\x40", 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -44; goto end_; }
+		if(!WriteFile(hfile, x265_mode ? (dst1 ? "UCI\x71" : "UCI\x70") : (dst1 ? "UCI\x41" : "UCI\x40"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -44; goto end_; }
 	}
 	if(!WriteFile(hfile, &w, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -45; goto end_; }
 	if(!WriteFile(hfile, &h, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -46; goto end_; }
@@ -592,16 +627,27 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	CloseHandle(hpiw); hpiw = INVALID_HANDLE_VALUE;
 
 	if(!opt0)
-		_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, q0, DEFAULT_OPT, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
+	{
+		if(x265_mode)
+			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %d --input-res %ux%u --input-depth %d --range full --fps 1 --input -", exe, q0, DEFAULT_X265_OPT, (wcscmp(format, L"i444") ? 1 : 3), ww, hh, yuv_in_10bit ? 10 : 8);
+		else
+			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, q0, DEFAULT_X264_OPT, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
+	}
 	else
-		_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, opt0, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
+	{
+		if(x265_mode)
+			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %d --input-res %ux%u --input-depth %d --range full --fps 1 --input -", exe, opt0, (wcscmp(format, L"i444") ? 1 : 3), ww, hh, yuv_in_10bit ? 10 : 8);
+		else
+			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, opt0, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
+	}
 
 	si.dwFlags = STARTF_USESTDHANDLES;
 	si.hStdInput = hpir;
 	si.hStdOutput = hpow;
 	si.hStdError = (is_quiet ? INVALID_HANDLE_VALUE : GetStdHandle(STD_ERROR_HANDLE));
 
-	if(!CreateProcessW(0, cmd, 0, 0, TRUE, 0, 0, 0, &si, &pi)) { fwprintf(stderr, L"ERROR: can't create x264 process: %ls\n", exe); ret = -52; goto end_; }
+//	printf("cmd: %ls\n", cmd);
+	if(!CreateProcessW(0, cmd, 0, 0, TRUE, 0, 0, 0, &si, &pi)) { fwprintf(stderr, L"ERROR: can't create x264/x265 process: %ls\n", exe); ret = -52; goto end_; }
 
 	for(;;)
 	{
@@ -620,7 +666,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	if(!GetExitCodeProcess(pi.hProcess, (DWORD*)&i)) { fwprintf(stderr, L"ERROR: can't get exit code of %ls\n", exe); ret = -57; goto end_; }
 	if(i != 0) { fwprintf(stderr, L"ERROR: %ls return code = %d\n", exe, i); ret = -58; goto end_; }
 
-	if(!need_info) RemoveInfo(buffer);
+	if(!need_info) RemoveInfo(buffer, x265_mode);
 	n = buffer.size();
 	if(!WriteFile(hfile, &n, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -59; goto end_; }
 	for(;;)
@@ -652,13 +698,23 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		CloseHandle(hpiw); hpiw = INVALID_HANDLE_VALUE;
 
 		if(!opt1)
-			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, q1, DEFAULT_OPT, format, format, ww, hh);
+		{
+			if(x265_mode)
+				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %d --input-res %ux%u --input-depth 8 --range full --fps 1 --input -", exe, q1, DEFAULT_X265_OPT, (wcscmp(format, L"i444") ? 1 : 3), ww, hh);
+			else
+				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, q1, DEFAULT_X264_OPT, format, format, ww, hh);
+		}
 		else
-			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, opt1, format, format, ww, hh);
+		{
+			if(x265_mode)
+				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %d --input-res %ux%u --input-depth 8 --range full --fps 1 --input -", exe, opt1, (wcscmp(format, L"i444") ? 1 : 3), ww, hh);
+			else
+				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, opt1, format, format, ww, hh);
+		}
 
 		si.hStdInput = hpir;
 
-		if(!CreateProcessW(0, cmd, 0, 0, TRUE, 0, 0, 0, &si, &pi)) { fwprintf(stderr, L"ERROR: can't create x264 process: %ls\n", exe); ret = -90; goto end_; }
+		if(!CreateProcessW(0, cmd, 0, 0, TRUE, 0, 0, 0, &si, &pi)) { fwprintf(stderr, L"ERROR: can't create x264/x265 process: %ls\n", exe); ret = -90; goto end_; }
 
 		for(;;)
 		{
@@ -677,7 +733,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		if(!GetExitCodeProcess(pi.hProcess, (DWORD*)&i)) { fwprintf(stderr, L"ERROR: can't get exit code of %ls\n", exe); ret = -95; goto end_; }
 		if(i != 0) { fwprintf(stderr, L"ERROR: %ls return code = %d\n", exe, i); ret = -96; goto end_; }
 
-		if(!need_info) RemoveInfo(buffer);
+		if(!need_info) RemoveInfo(buffer, x265_mode);
 		n = buffer.size();
 		if(!WriteFile(hfile, &n, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -97; goto end_; }
 		for(;;)
