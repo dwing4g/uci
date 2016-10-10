@@ -64,7 +64,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(argc < 2)
 	{
-		fwprintf(stderr,	L"UCI (Ultra Compact Image) Decoder " UCI_VERSION L" [by dwing] " UCI_DATE L"\n"
+		fwprintf(stderr,	L"UCI (Ultra Compact Image) Decoder " UCI_VERSION_W L" [by dwing] " UCI_DATE_W L"\n"
 							L"Usage:   ucidec <src_file.uci> [options]\n"
 							L"Options: -o <filename> set output file name, default: <src_file>.bmp\n"
 							L"         -d            enable debug info output\n"
@@ -87,7 +87,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 			wchar_t* dot;
 			wcsncpy(dstname, argv[1], sizeof(dstname)/sizeof(*dstname) - 8);
 			dot = wcsrchr(dstname, L'.');
-			if(dot && wcsicmp(dot + 1, L"bmp"))
+			if(dot && _wcsicmp(dot + 1, L"bmp"))
 				wcscpy(dot + 1, L"bmp");
 			else
 				wcscat(dstname, L".bmp");
@@ -99,7 +99,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(use_stdin)
 	{
-		setmode(fileno(stdin), _O_BINARY);
+		_setmode(_fileno(stdin), _O_BINARY);
 		if(fread(buf, 1, 0x10, stdin) != 0x10) { fwprintf(stderr, L"ERROR: can't read stdin\n"); ret = -10; goto end_; }
 		if((*(unsigned*)buf & 0xffffff) != *(unsigned*)"UCI") { fwprintf(stderr, L"ERROR: unknown format\n"); ret = -11; goto end_; }
 		srclen = 16 + *(int*)(buf + 0x0c);
@@ -175,7 +175,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(use_stdout)
 	{
-		setmode(fileno(stdout), _O_BINARY);
+		_setmode(_fileno(stdout), _O_BINARY);
 		fp = stdout;
 	}
 	else

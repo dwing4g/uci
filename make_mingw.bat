@@ -12,7 +12,7 @@ rem ./configure --toolchain=msvc --arch=x86 --enable-yasm --enable-asm --disable
 rem config.mak: -O2 => -O2 -Ob2 -Oi -Ot -Oy -GF -GS- -MT; -flto => -GL / -LTCG
 
 set MINGW_HOME=D:\mingw
-set FFMPEG_HOME=D:\ffmpeg-3.1.3
+set FFMPEG_HOME=D:\ffmpeg-3.1.4
 rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_102
 
 set GCCEXE=%MINGW_HOME%\bin\gcc.exe

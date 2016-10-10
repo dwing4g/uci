@@ -57,7 +57,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	int size, hasimg, bit10;
 	U8* psrc, *pdst;
 	const U8* srcend = (const U8*)src + srclen;
-	AVCodec* ff_decoder = &ff_h264_decoder;
+	const AVCodec* ff_decoder = &ff_h264_decoder;
 
 	if(dst	 ) *dst    = 0;
 	if(stride) *stride = 0;
@@ -135,10 +135,8 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	EnterCriticalSection(&g_cs);
 	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
 	if(!g_context && !(g_context = avcodec_alloc_context3(ff_decoder)))			{ ret = -21; goto end_; }
-	g_context->flags &= ~CODEC_FLAG_EMU_EDGE;
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 	if(avcodec_open2(g_context, ff_decoder, 0) < 0)								{ ret = -22; goto end_; }
-	g_context->flags &= ~CODEC_FLAG_EMU_EDGE;
 	g_packet.data = frame_data[0];
 	g_packet.size = frame_size[0];
 	size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -161,7 +159,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 		g_swsctx = sws_getCachedContext(g_swsctx, ww, hh, pfsrc, ww, hh, pfdst, SWS_LANCZOS, 0, 0, 0);
 		if(!g_swsctx)											{ ret = -29; goto end_; }
 		sws_setColorspaceDetails(g_swsctx, g_cs_table, m != 0, g_cs_table, m != 0, 0, 1 << 16, 1 << 16);
-		if(sws_scale(g_swsctx, g_frame->data, g_frame->linesize, 0, hh, dst, stride) != hh) { ret = -30; goto end_; }
+		if(sws_scale(g_swsctx, g_frame->data, g_frame->linesize, 0, hh, (uint8_t**)dst, stride) != hh) { ret = -30; goto end_; }
 	}
 	else
 	{
@@ -197,9 +195,9 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(b == 32)
 	{
 		avcodec_close(g_context);
-		if(!(g_context = avcodec_alloc_context3(&ff_decoder)))	{ ret = -40; goto end_; }
+		if(!(g_context = avcodec_alloc_context3(ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-		if(avcodec_open2(g_context, &ff_decoder, 0) < 0)		{ ret = -41; goto end_; }
+		if(avcodec_open2(g_context, ff_decoder, 0) < 0)			{ ret = -41; goto end_; }
 		g_packet.data = frame_data[3];
 		g_packet.size = frame_size[3];
 		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -221,7 +219,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 			for(; h; --h)
 			{
 				for(m = 0; m < w; ++m)
-					pdst[m * 4] = ((U16*)psrc)[m] >> 2;
+					pdst[m * 4] = (U8)(((U16*)psrc)[m] >> 2);
 				psrc += g_frame->linesize[0];
 				pdst += *stride;
 			}
@@ -397,9 +395,9 @@ static int __stdcall UCIDecode4XnView(
 
 	EnterCriticalSection(&g_cs);
 	if(!g_frame && !(g_frame = av_frame_alloc()))								{ ret = -20; goto end_; }
-	if(!g_context && !(g_context = avcodec_alloc_context3(&ff_decoder)))		{ ret = -21; goto end_; }
+	if(!g_context && !(g_context = avcodec_alloc_context3(ff_decoder)))			{ ret = -21; goto end_; }
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-	if(avcodec_open2(g_context, &ff_decoder, 0) < 0)							{ ret = -22; goto end_; }
+	if(avcodec_open2(g_context, ff_decoder, 0) < 0)								{ ret = -22; goto end_; }
 	g_packet.data = frame_data[0];
 	g_packet.size = frame_size[0];
 	size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -422,7 +420,7 @@ static int __stdcall UCIDecode4XnView(
 		if(!g_swsctx)											{ ret = -29; goto end_; }
 		sws_setColorspaceDetails(g_swsctx, g_cs_table, m != 0, g_cs_table, m != 0, 0, 1 << 16, 1 << 16);
 		dst1[0] = (U8*)*dst + 1;
-		if(sws_scale(g_swsctx, g_frame->data, g_frame->linesize, 0, hh, (b == 24 ? dst : dst1), stride) != hh) { ret = -30; goto end_; }
+		if(sws_scale(g_swsctx, g_frame->data, g_frame->linesize, 0, hh, (uint8_t**)(b == 24 ? dst : dst1), stride) != hh) { ret = -30; goto end_; }
 	}
 	else
 	{
@@ -458,9 +456,9 @@ static int __stdcall UCIDecode4XnView(
 	if(b == 32)
 	{
 		avcodec_close(g_context);
-		if(!(g_context = avcodec_alloc_context3(&ff_decoder)))	{ ret = -40; goto end_; }
+		if(!(g_context = avcodec_alloc_context3(ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
-		if(avcodec_open2(g_context, &ff_decoder, 0) < 0)		{ ret = -41; goto end_; }
+		if(avcodec_open2(g_context, ff_decoder, 0) < 0)			{ ret = -41; goto end_; }
 		g_packet.data = frame_data[3];
 		g_packet.size = frame_size[3];
 		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
@@ -482,7 +480,7 @@ static int __stdcall UCIDecode4XnView(
 			for(; h; --h)
 			{
 				for(m = 0; m < w; ++m)
-					pdst[m * 4] = ((U16*)psrc)[m] >> 2;
+					pdst[m * 4] = (U8)(((U16*)psrc)[m] >> 2);
 				psrc += g_frame->linesize[0];
 				pdst += *stride;
 			}
@@ -533,6 +531,10 @@ __declspec(dllexport) void* __stdcall gfpLoadPictureInit(const char* filename)
 	case 0x21:	ip->yuv444 = 0; goto sec2_;
 	case 0x40:	ip->yuv444 = 1; goto sec1_;
 	case 0x41:	ip->yuv444 = 1; goto sec2_;
+	case 0x60:	ip->yuv444 = 0; goto sec1_;
+	case 0x61:	ip->yuv444 = 0; goto sec2_;
+	case 0x70:	ip->yuv444 = 1; goto sec1_;
+	case 0x71:	ip->yuv444 = 1; goto sec2_;
 	default: goto err_;
 	}
 
@@ -831,8 +833,8 @@ __declspec(dllexport) int __stdcall GetPreview(const char* filename, int len, un
 JNIEXPORT jint JNICALL Java_UCIDec_UCIDecode(JNIEnv* jenv, jclass jcls, jbyteArray j_src, jint j_srclen, jobjectArray j_dsts, jintArray j_stride, jintArray j_w, jintArray j_h, jintArray j_b)
 {
 	jcls;
-	const void* const src = (*jenv)->GetByteArrayElements(jenv, j_src, 0);
-	const void* dst = 0;
+	void* const src = (*jenv)->GetByteArrayElements(jenv, j_src, 0);
+	void* dst = 0;
 	int stride, w, h, b;
 	const int r = UCIDecode(src, (int)j_srclen, (j_dsts && (*jenv)->GetArrayLength(jenv, j_dsts) > 0) ? &dst : 0, &stride, &w, &h, &b);
 	(*jenv)->ReleaseByteArrayElements(jenv, j_src, src, JNI_ABORT);
@@ -846,10 +848,10 @@ JNIEXPORT jint JNICALL Java_UCIDec_UCIDecode(JNIEnv* jenv, jclass jcls, jbyteArr
 			UCIFree(dst);
 			(*jenv)->SetObjectArrayElement(jenv, j_dsts, 0, j_dst);
 		}
-		if(j_stride && (*jenv)->GetArrayLength(jenv, j_stride) > 0) (*jenv)->SetIntArrayRegion(jenv, j_stride, 0, 1, &stride);
-		if(j_w		&& (*jenv)->GetArrayLength(jenv, j_w	 ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_w	 , 0, 1, &w		);
-		if(j_h		&& (*jenv)->GetArrayLength(jenv, j_h	 ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_h	 , 0, 1, &h		);
-		if(j_b		&& (*jenv)->GetArrayLength(jenv, j_b	 ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_b	 , 0, 1, &b		);
+		if(j_stride && (*jenv)->GetArrayLength(jenv, j_stride) > 0) (*jenv)->SetIntArrayRegion(jenv, j_stride, 0, 1, (jint*)&stride);
+		if(j_w      && (*jenv)->GetArrayLength(jenv, j_w     ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_w     , 0, 1, (jint*)&w     );
+		if(j_h      && (*jenv)->GetArrayLength(jenv, j_h     ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_h     , 0, 1, (jint*)&h     );
+		if(j_b      && (*jenv)->GetArrayLength(jenv, j_b     ) > 0) (*jenv)->SetIntArrayRegion(jenv, j_b     , 0, 1, (jint*)&b     );
 	}
 	return (jint)r;
 }

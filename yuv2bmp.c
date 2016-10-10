@@ -107,7 +107,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(argc < 2)
 	{
-		fwprintf(stderr,	L"YUV2BMP Converter " UCI_VERSION L" [by dwing] " UCI_DATE L"\n"
+		fwprintf(stderr,	L"YUV2BMP Converter " UCI_VERSION_W L" [by dwing] " UCI_DATE_W L"\n"
 							L"Usage:   yuv2bmp <src_file.yuv> [options]\n"
 							L"Options: -o <filename> set output file name, default: <src_file>.bmp\n"
 							L"         -w <width>    set input width , must be 2x for i420, default: 256\n"
@@ -134,7 +134,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 			wchar_t* dot;
 			wcsncpy(dstname, argv[1], sizeof(dstname)/sizeof(*dstname) - 8);
 			dot = wcsrchr(dstname, L'.');
-			if(dot && wcsicmp(dot + 1, L"bmp"))
+			if(dot && _wcsicmp(dot + 1, L"bmp"))
 				wcscpy(dot + 1, L"bmp");
 			else
 				wcscat(dstname, L".bmp");
@@ -158,7 +158,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(use_stdin)
 	{
-		setmode(fileno(stdin), _O_BINARY);
+		_setmode(_fileno(stdin), _O_BINARY);
 		for(i = 0; i < srclen; )
 		{
 			int ii = fread(src + i, 1, srclen - i, stdin);
@@ -214,7 +214,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(use_stdout)
 	{
-		setmode(fileno(stdout), _O_BINARY);
+		_setmode(_fileno(stdout), _O_BINARY);
 		fp = stdout;
 	}
 	else

@@ -20,8 +20,8 @@
 	#endif
 #endif
 
-#define DEFAULT_X264_OPT L"-b 0 -r 0 -m 11 -t 2 --aq-mode 2 --no-psy --threads 1"
-#define DEFAULT_X265_OPT L"--bframes 0 --ref 1 -m 7 --aq-mode 2 --no-psy-rd"
+#define DEFAULT_X264_OPT L"-b0 -m11 -t2 --aq-mode 2 --no-psy --threads 1"
+#define DEFAULT_X265_OPT L"--bframes 0 --ref 1 -m7 --aq-mode 2 --psy-rd 0"
 #define DEFAULT_X264_CRF 27
 #define DEFAULT_X265_CRF 43
 
@@ -395,7 +395,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		}
 	}
 	if(!exe) exe = (hevc_mode ? L"x265.exe" : L"x264.exe");
-	if(q0 < 0.0f) q0 = (hevc_mode ? DEFAULT_X265_CRF : DEFAULT_X264_CRF);
+	if(q0 < 0.0f) q0 = (float)(hevc_mode ? DEFAULT_X265_CRF : DEFAULT_X264_CRF);
 	if(q1 < 0.0f) q1 = q0;
 	if(!opt1) opt1 = opt0;
 	if(yuv_in)
@@ -413,7 +413,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(argc < 2)
 	{
-		fwprintf(stderr,L"UCI (Ultra Compact Image) Encoder " UCI_VERSION L" [by dwing] " UCI_DATE L"\n"
+		fwprintf(stderr,L"UCI (Ultra Compact Image) Encoder " UCI_VERSION_W L" [by dwing] " UCI_DATE_W L"\n"
 						L"Usage:   ucienc <src_file.bmp> [options]\n"
 						L"Options: -o <filename> set output file name, default: <src_file>.uci\n"
 						L"         -hevc         encode with HEVC(x265) instead of H.264(x264)\n"
@@ -459,7 +459,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 			if(!yuv_out)
 			{
 				dot = wcsrchr(dstname, L'.');
-				if(dot && wcsicmp(dot + 1, L"uci"))
+				if(dot && _wcsicmp(dot + 1, L"uci"))
 					wcscpy(dot + 1, L"uci");
 				else
 					wcscat(dstname, L".uci");
@@ -467,7 +467,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 			else
 			{
 				dot = wcsrchr(dstname, L'.');
-				if(dot && wcsicmp(dot + 1, L"yuv"))
+				if(dot && _wcsicmp(dot + 1, L"yuv"))
 					wcscpy(dot + 1, L"yuv");
 				else
 					wcscat(dstname, L".yuv");

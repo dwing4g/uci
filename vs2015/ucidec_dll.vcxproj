@@ -71,7 +71,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_102\include;C:\Program Files\Java\jdk1.8.0_102\include\win32;D:\ffmpeg-3.1.3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_102\include;C:\Program Files\Java\jdk1.8.0_102\include\win32;D:\ffmpeg-3.1.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,7 +80,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>ucidec.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>libavcodec.lib;libavutil.lib;libswscale.lib</AdditionalDependencies>
+      <AdditionalDependencies>libavcodec.a;libavutil.a;libswscale.a</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
