@@ -35,7 +35,7 @@ __forceinline void FixY(void* dst, int dstlen)
 		if(*pdst < 255) ++*pdst;
 }
 
-__forceinline void RemoveInfo(Buffer& buffer, char x265_mode)
+__forceinline void RemoveInfo(Buffer& buffer, char hevc_mode)
 {
 	if(buffer.size() >= 0x100)
 	{
@@ -44,7 +44,7 @@ __forceinline void RemoveInfo(Buffer& buffer, char x265_mode)
 		for(int i = 0; i < 0x60; ++i)
 		{
 			head[i + 6] = buffer[i + 6];
-			if(x265_mode)
+			if(hevc_mode)
 			{
 				U32 len = 7;
 				if(!memcmp(head + i, "\x00\x00\x01\x4e\x01\x05\xff", len))	// 00 00 01 4E 01 05 FF
@@ -220,11 +220,11 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	U8* temp = 0;
 	int srclen, dstlen;
 	int w = 0, h = 0, ww, hh;
-	float q0 = DEFAULT_X264_CRF;
+	float q0 = -1.0f;
 	float q1 = -1.0f;
 	const wchar_t* opt0 = 0;
 	const wchar_t* opt1 = 0;
-	const wchar_t* exe = L"x264.exe";
+	const wchar_t* exe = 0;
 	const wchar_t* format = 0;
 	char use_stdin = 0;
 	char use_stdout = 0;
@@ -233,7 +233,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	char is_quiet = 0;
 	char yuv_out_10bit = 0;
 	char yuv_in_10bit = 0;
-	char x265_mode = 0;
+	char hevc_mode = 0;
 	int yuv_out = 0;	// 1:yuv420 2:yuv444
 	int yuv_in = 0; 	// 1:yuv420 2:yuv444
 	char buf[0x20];
@@ -254,11 +254,9 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 			}
 			wcsncpy(dstname, argv[i], sizeof(dstname)/sizeof(*dstname) - 1);
 		}
-		else if(!wcscmp(argv[i], L"-x265"))
+		else if(!wcscmp(argv[i], L"-hevc"))
 		{
-			x265_mode = 1;
-			exe = L"x265.exe";
-			q0 = DEFAULT_X265_CRF;
+			hevc_mode = 1;
 		}
 		else if(!wcscmp(argv[i], L"-q"))
 		{
@@ -396,6 +394,8 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 			ret = -16; goto end_;
 		}
 	}
+	if(!exe) exe = (hevc_mode ? L"x265.exe" : L"x264.exe");
+	if(q0 < 0.0f) q0 = (hevc_mode ? DEFAULT_X265_CRF : DEFAULT_X264_CRF);
 	if(q1 < 0.0f) q1 = q0;
 	if(!opt1) opt1 = opt0;
 	if(yuv_in)
@@ -416,7 +416,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		fwprintf(stderr,L"UCI (Ultra Compact Image) Encoder " UCI_VERSION L" [by dwing] " UCI_DATE L"\n"
 						L"Usage:   ucienc <src_file.bmp> [options]\n"
 						L"Options: -o <filename> set output file name, default: <src_file>.uci\n"
-						L"         -x265         use x265 instead of x264\n"
+						L"         -hevc         encode with HEVC(x265) instead of H.264(x264)\n"
 						L"         -q <number>   set quality of RGB/YUV channel compression\n"
 						L"                       [0.0 ~ 51.0] (best ~ worst) default: %d/%d\n"
 						L"         -Q <number>   set quality of alpha channel compression\n"
@@ -611,11 +611,11 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(!yuv444)
 	{
-		if(!WriteFile(hfile, x265_mode ? (dst1 ? "UCI\x61" : "UCI\x60") : (dst1 ? "UCI\x21" : "UCI\x20"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -43; goto end_; }
+		if(!WriteFile(hfile, hevc_mode ? (dst1 ? "UCI\x61" : "UCI\x60") : (dst1 ? "UCI\x21" : "UCI\x20"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -43; goto end_; }
 	}
 	else
 	{
-		if(!WriteFile(hfile, x265_mode ? (dst1 ? "UCI\x71" : "UCI\x70") : (dst1 ? "UCI\x41" : "UCI\x40"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -44; goto end_; }
+		if(!WriteFile(hfile, hevc_mode ? (dst1 ? "UCI\x71" : "UCI\x70") : (dst1 ? "UCI\x41" : "UCI\x40"), 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -44; goto end_; }
 	}
 	if(!WriteFile(hfile, &w, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -45; goto end_; }
 	if(!WriteFile(hfile, &h, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -46; goto end_; }
@@ -628,14 +628,14 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 
 	if(!opt0)
 	{
-		if(x265_mode)
+		if(hevc_mode)
 			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %d --input-res %ux%u --input-depth %d --range full --fps 1 --input -", exe, q0, DEFAULT_X265_OPT, (wcscmp(format, L"i444") ? 1 : 3), ww, hh, yuv_in_10bit ? 10 : 8);
 		else
 			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, q0, DEFAULT_X264_OPT, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
 	}
 	else
 	{
-		if(x265_mode)
+		if(hevc_mode)
 			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %d --input-res %ux%u --input-depth %d --range full --fps 1 --input -", exe, opt0, (wcscmp(format, L"i444") ? 1 : 3), ww, hh, yuv_in_10bit ? 10 : 8);
 		else
 			_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth %d --input-range pc --range pc -", exe, opt0, format, format, ww, hh, yuv_in_10bit ? 10 : 8);
@@ -666,7 +666,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 	if(!GetExitCodeProcess(pi.hProcess, (DWORD*)&i)) { fwprintf(stderr, L"ERROR: can't get exit code of %ls\n", exe); ret = -57; goto end_; }
 	if(i != 0) { fwprintf(stderr, L"ERROR: %ls return code = %d\n", exe, i); ret = -58; goto end_; }
 
-	if(!need_info) RemoveInfo(buffer, x265_mode);
+	if(!need_info) RemoveInfo(buffer, hevc_mode);
 	n = buffer.size();
 	if(!WriteFile(hfile, &n, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -59; goto end_; }
 	for(;;)
@@ -699,14 +699,14 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 
 		if(!opt1)
 		{
-			if(x265_mode)
+			if(hevc_mode)
 				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %d --input-res %ux%u --input-depth 8 --range full --fps 1 --input -", exe, q1, DEFAULT_X265_OPT, (wcscmp(format, L"i444") ? 1 : 3), ww, hh);
 			else
 				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls --crf %f %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, q1, DEFAULT_X264_OPT, format, format, ww, hh);
 		}
 		else
 		{
-			if(x265_mode)
+			if(hevc_mode)
 				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %d --input-res %ux%u --input-depth 8 --range full --fps 1 --input -", exe, opt1, (wcscmp(format, L"i444") ? 1 : 3), ww, hh);
 			else
 				_snwprintf(cmd, sizeof(cmd) - 1, L"%ls %ls -o - --input-csp %ls --output-csp %ls --input-res %ux%u --input-depth 8 --input-range pc --range pc -", exe, opt1, format, format, ww, hh);
@@ -733,7 +733,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		if(!GetExitCodeProcess(pi.hProcess, (DWORD*)&i)) { fwprintf(stderr, L"ERROR: can't get exit code of %ls\n", exe); ret = -95; goto end_; }
 		if(i != 0) { fwprintf(stderr, L"ERROR: %ls return code = %d\n", exe, i); ret = -96; goto end_; }
 
-		if(!need_info) RemoveInfo(buffer, x265_mode);
+		if(!need_info) RemoveInfo(buffer, hevc_mode);
 		n = buffer.size();
 		if(!WriteFile(hfile, &n, 4, (DWORD*)&i, 0) || i != 4) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -97; goto end_; }
 		for(;;)

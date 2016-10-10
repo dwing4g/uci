@@ -1,6 +1,6 @@
 = Ultra Compact Image (UCI) =
 
-lossy compression image format based on H.264
+lossy compression image format based on H.264/HEVC
 
 Feature:
  * support any pixels of width and height (within 8192x8192)
