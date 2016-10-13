@@ -439,8 +439,8 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 						L"         x265 option:  --crf %d %ls\n"
 						L"Notes:   input file must be a 24 or 32 bit uncompressed BMP format file\n"
 						L"         specify - instead of filename to use stdin/stdout\n"
-						L"Examples:ucienc input.bmp -q 30 -Q 35\n"
-						L"         ucienc - -o output.uci -x \"-q 30\"\n",
+						L"Examples:ucienc input.bmp -q 25 -Q 30\n"
+						L"         ucienc - -o output.uci -x \"-q 27\" -hevc\n",
 						DEFAULT_X264_CRF, DEFAULT_X265_CRF, DEFAULT_X264_CRF, DEFAULT_X264_OPT, DEFAULT_X265_CRF, DEFAULT_X265_OPT);
 		return 1;
 	}

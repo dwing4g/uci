@@ -35,6 +35,17 @@ const int*			g_cs_table		= 0;
 //const int			g_cs_table[4]	= { 104611, 132130, 25748, 53290 }; // custom for uci
 AVPacket			g_packet;
 
+__forceinline int DecodeImage(U8* data, int size)
+{
+	int r;
+	g_packet.data = data;
+	g_packet.size = size;
+	r = avcodec_send_packet(g_context, &g_packet);
+	if(r) return r;
+	// avcodec_send_packet(g_context, 0);
+	return avcodec_receive_frame(g_context, g_frame);
+}
+
 // UCI格式图像解码,目前只支持输出24位BGR和32位的BGRA,返回0表示调用成功,负数表示错误,不支持多线程同时访问
 __declspec(dllexport) int __stdcall UCIDecode(
 	const void* src,	// 输入UCI数据指针(不能传入null,其它指针参数可以传入null表示不需要输出)
@@ -54,7 +65,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	int frame_size[4];
 	int w, h, b, m;
 	int ww, hh;
-	int size, hasimg, bit10;
+	int bit10;
 	U8* psrc, *pdst;
 	const U8* srcend = (const U8*)src + srclen;
 	const AVCodec* ff_decoder = &ff_h264_decoder;
@@ -137,11 +148,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(!g_context && !(g_context = avcodec_alloc_context3(ff_decoder)))			{ ret = -21; goto end_; }
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 	if(avcodec_open2(g_context, ff_decoder, 0) < 0)								{ ret = -22; goto end_; }
-	g_packet.data = frame_data[0];
-	g_packet.size = frame_size[0];
-	size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-	if(size <= 0)																{ ret = -100 + size; goto end_; }
-	if(!hasimg) 																{ ret = -23; goto end_; }
+	if((ret = DecodeImage(frame_data[0], frame_size[0])))						{ ret = -100 + ret; goto end_; }
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
@@ -167,22 +174,14 @@ __declspec(dllexport) int __stdcall UCIDecode(
 		memcpy(frame0, g_frame->data[0], g_frame->linesize[0] * h);
 		frame_data[0] = frame0;
 		frame_size[0] = g_frame->linesize[0];
-		g_packet.data = frame_data[1];
-		g_packet.size = frame_size[1];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -200 + size; goto end_; }
-		if(!hasimg) 											{ ret = -32; goto end_; }
+		if((ret = DecodeImage(frame_data[1], frame_size[1])))	{ ret = -200 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -33; goto end_; }
 		if(!g_frame->data[0])									{ ret = -34; goto end_; }
 		if(!(frame1 = (U8*)malloc(g_frame->linesize[0] * h)))	{ ret = -35; goto end_; }
 		memcpy(frame1, g_frame->data[0], g_frame->linesize[0] * h);
 		frame_data[1] = frame1;
 		frame_size[1] = g_frame->linesize[0];
-		g_packet.data = frame_data[2];
-		g_packet.size = frame_size[2];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -300 + size; goto end_; }
-		if(!hasimg) 											{ ret = -36; goto end_; }
+		if((ret = DecodeImage(frame_data[2], frame_size[2])))	{ ret = -300 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -37; goto end_; }
 		if(!g_frame->data[0])									{ ret = -38; goto end_; }
 		frame_data[2] = g_frame->data[0];
@@ -198,11 +197,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 		if(!(g_context = avcodec_alloc_context3(ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 		if(avcodec_open2(g_context, ff_decoder, 0) < 0)			{ ret = -41; goto end_; }
-		g_packet.data = frame_data[3];
-		g_packet.size = frame_size[3];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -400 + size; goto end_; }
-		if(!hasimg) 											{ ret = -42; goto end_; }
+		if((ret = DecodeImage(frame_data[3], frame_size[3])))	{ ret = -400 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -43; goto end_; }
 		if(!g_frame->data[0])									{ ret = -44; goto end_; }
 		psrc = g_frame->data[0];
@@ -315,7 +310,7 @@ static int __stdcall UCIDecode4XnView(
 	int frame_size[4];
 	int w, h, b, m;
 	int ww, hh;
-	int size, hasimg, bit10;
+	int bit10;
 	U8* psrc, *pdst;
 	const U8* srcend = (const U8*)src + srclen;
 	AVCodec* ff_decoder = &ff_h264_decoder;
@@ -398,11 +393,7 @@ static int __stdcall UCIDecode4XnView(
 	if(!g_context && !(g_context = avcodec_alloc_context3(ff_decoder)))			{ ret = -21; goto end_; }
 	if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 	if(avcodec_open2(g_context, ff_decoder, 0) < 0)								{ ret = -22; goto end_; }
-	g_packet.data = frame_data[0];
-	g_packet.size = frame_size[0];
-	size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-	if(size <= 0)																{ ret = -100 + size; goto end_; }
-	if(!hasimg) 																{ ret = -23; goto end_; }
+	if((ret = DecodeImage(frame_data[0], frame_size[0])))						{ ret = -100 + ret; goto end_; }
 	if(g_context->width < ww || g_context->height < hh)							{ ret = -24; goto end_; }
 	if(!g_frame->data[0] || m != 1 && (!g_frame->data[1] || !g_frame->data[2]))	{ ret = -25; goto end_; }
 	if(g_frame->linesize[1] != g_frame->linesize[2])							{ ret = -26; goto end_; }
@@ -428,22 +419,14 @@ static int __stdcall UCIDecode4XnView(
 		memcpy(frame0, g_frame->data[0], g_frame->linesize[0] * h);
 		frame_data[0] = frame0;
 		frame_size[0] = g_frame->linesize[0];
-		g_packet.data = frame_data[1];
-		g_packet.size = frame_size[1];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -200 + size; goto end_; }
-		if(!hasimg) 											{ ret = -32; goto end_; }
+		if((ret = DecodeImage(frame_data[1], frame_size[1])))	{ ret = -200 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -33; goto end_; }
 		if(!g_frame->data[0])									{ ret = -34; goto end_; }
 		if(!(frame1 = (U8*)malloc(g_frame->linesize[0] * h)))	{ ret = -35; goto end_; }
 		memcpy(frame1, g_frame->data[0], g_frame->linesize[0] * h);
 		frame_data[1] = frame1;
 		frame_size[1] = g_frame->linesize[0];
-		g_packet.data = frame_data[2];
-		g_packet.size = frame_size[2];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -300 + size; goto end_; }
-		if(!hasimg) 											{ ret = -36; goto end_; }
+		if((ret = DecodeImage(frame_data[2], frame_size[2])))	{ ret = -300 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -37; goto end_; }
 		if(!g_frame->data[0])									{ ret = -38; goto end_; }
 		frame_data[2] = g_frame->data[0];
@@ -459,11 +442,7 @@ static int __stdcall UCIDecode4XnView(
 		if(!(g_context = avcodec_alloc_context3(ff_decoder)))	{ ret = -40; goto end_; }
 		if(av_log_get_level() >= AV_LOG_DEBUG) g_context->debug = -1;
 		if(avcodec_open2(g_context, ff_decoder, 0) < 0)			{ ret = -41; goto end_; }
-		g_packet.data = frame_data[3];
-		g_packet.size = frame_size[3];
-		size = avcodec_decode_video2(g_context, g_frame, &hasimg, &g_packet);
-		if(size <= 0)											{ ret = -400 + size; goto end_; }
-		if(!hasimg) 											{ ret = -42; goto end_; }
+		if((ret = DecodeImage(frame_data[3], frame_size[3])))	{ ret = -400 + ret; goto end_; }
 		if(g_context->width < ww || g_context->height < hh)		{ ret = -43; goto end_; }
 		if(!g_frame->data[0])									{ ret = -44; goto end_; }
 		psrc = g_frame->data[0];

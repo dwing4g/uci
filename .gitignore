@@ -4,5 +4,6 @@
 /vs2015/*.db
 /vs2015/*.opendb
 /vs2015/*.lib
+/vs2015/*.a
 /vs2015/*.exp
 /vs2015/*.pdb
