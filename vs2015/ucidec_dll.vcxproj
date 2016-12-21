@@ -71,7 +71,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_102\include;C:\Program Files\Java\jdk1.8.0_102\include\win32;D:\ffmpeg-3.1.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_102\include;C:\Program Files\Java\jdk1.8.0_102\include\win32;D:\ffmpeg-3.2.2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
