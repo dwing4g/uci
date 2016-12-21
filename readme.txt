@@ -1,4 +1,4 @@
-﻿UCI (Ultra Compact Image) 0.601 by dwing 2016-10-??
+﻿UCI (Ultra Compact Image) 0.601 by dwing 2016-12-??
 
 
 * 简介
@@ -83,7 +83,7 @@ void __stdcall UCIDebug(int level);
 
 * 更新历史(以下版本的UCI格式及解码器均向后兼容)
 
-0.601(2016-10-??)
+0.601(2016-12-??) 更新FFmpeg至3.2.2,调整x265默认编码参数
 0.6  (2016-10-10) 更新FFmpeg至3.1.4,支持x265编码,支持VC2015编译,默认二进制发布版本使用VC2015编译
 0.526(2016-09-30) 更新FFmpeg至3.1.3,使用MinGW-GCC 6.2编译
 0.525(2013-12-20) 更新FFmpeg,使用MinGW-GCC 4.8.2编译,发布五周年开源纪念版

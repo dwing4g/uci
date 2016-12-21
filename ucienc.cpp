@@ -21,9 +21,9 @@
 #endif
 
 #define DEFAULT_X264_OPT L"-b0 -m11 -t2 --aq-mode 2 --no-psy --threads 1"
-#define DEFAULT_X265_OPT L"--bframes 0 --ref 1 -m7 --aq-mode 2 --psy-rd 0"
+#define DEFAULT_X265_OPT L"-p placebo --ref 1 --bframes 0 --aq-mode 2 --psy-rd 0 -F 1"
 #define DEFAULT_X264_CRF 27
-#define DEFAULT_X265_CRF 43
+#define DEFAULT_X265_CRF 42
 
 // extern "C" int __sse2_available = 0;
 

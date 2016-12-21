@@ -7,12 +7,12 @@ rem mingw-gcc: http://files.1f0.de/mingw/
 rem jdk: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 rem ffmpeg: git://source.ffmpeg.org/ffmpeg.git
 rem ./configure --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-decoder=hevc --enable-lto --disable-debug --disable-dxva2 --disable-iconv
-rem config.mak: CFLAGS=... -Ofast -ffat-lto-objects ...
+rem config.mak: -O3 => -Ofast -ffat-lto-objects
 rem ./configure --toolchain=msvc --arch=x86 --enable-yasm --enable-asm --disable-shared --enable-static --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-decoder=hevc --enable-lto --disable-debug --disable-dxva2 --disable-iconv
 rem config.mak: -O2 => -O2 -Ob2 -Oi -Ot -Oy -GF -GS- -MT; -flto => -GL / -LTCG
 
 set MINGW_HOME=D:\mingw
-set FFMPEG_HOME=D:\ffmpeg-3.1.4
+set FFMPEG_HOME=D:\ffmpeg-3.2.2
 rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_102
 
 set GCCEXE=%MINGW_HOME%\bin\gcc.exe
