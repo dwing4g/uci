@@ -21,12 +21,12 @@
 #endif
 
 #define DEFAULT_X264_OPT L"-b0 -m11 -t2 --aq-mode 2 --no-psy --threads 1"
-#define DEFAULT_X265_OPT L"-p placebo --ref 1 --bframes 0 --aq-mode 2 --psy-rd 0 -F 1"
+#define DEFAULT_X265_OPT L"-p placebo --ref 1 --bframes 0 --aq-mode 2 --psy-rd 0 -F 1" // "--no-vui-timing-info" can save 9 bytes, but not identified by MediaInfo
 #define DEFAULT_X264_CRF 27
 #define DEFAULT_X265_CRF 42
 
 // extern "C" int __sse2_available = 0;
-
+/*
 __forceinline void FixY(void* dst, int dstlen)
 {
 	U8* pdst = (U8*)dst;
@@ -34,7 +34,7 @@ __forceinline void FixY(void* dst, int dstlen)
 	for(; pdst < pdstend; ++pdst)
 		if(*pdst < 255) ++*pdst;
 }
-
+*/
 __forceinline void RemoveInfo(Buffer& buffer, char hevc_mode)
 {
 	if(buffer.size() >= 0x100)
