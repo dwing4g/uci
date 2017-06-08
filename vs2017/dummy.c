@@ -1120,3 +1120,11 @@ void ff_hevc_v_loop_filter_luma_12_ssse3() {}
 void ff_hevc_v_loop_filter_luma_8_avx() {}
 void ff_hevc_v_loop_filter_luma_8_sse2() {}
 void ff_hevc_v_loop_filter_luma_8_ssse3() {}
+void ff_hevc_idct_16x16_8_avx() {}
+void ff_hevc_idct_16x16_10_sse2() {}
+void ff_hevc_idct_32x32_10_avx() {}
+void ff_hevc_idct_16x16_10_avx() {}
+void ff_hevc_idct_32x32_10_sse2() {}
+void ff_hevc_idct_16x16_8_sse2() {}
+void ff_hevc_idct_32x32_8_avx() {}
+void ff_hevc_idct_32x32_8_sse2() {}
