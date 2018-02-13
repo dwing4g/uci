@@ -691,14 +691,14 @@ __declspec(dllexport) int __stdcall GetPluginInfo(int id, char* dst, int dstlen)
 	switch(id)
 	{
 	case 0: strcpy(dst, "00IN"); return 4;
-	case 1: { static const char* s = "UCI Susie Plugin " UCI_VERSION " by dwing"; strcpy(dst, s); return strlen(s); }
+	case 1: { static const char* s = "UCI Susie Plugin " UCI_VERSION " by dwing"; strcpy(dst, s); return (int)strlen(s); }
 	case 2:
 	case 3: strcpy(dst, "*.uci"); return 5;
 	}
 	return 0;
 }
 
-__declspec(dllexport) int __stdcall IsSupported(const char* filename, int dw)
+__declspec(dllexport) int __stdcall IsSupported(const char* filename, size_t dw)
 {
 	if(!(dw & 0xffff0000))
 	{
@@ -708,7 +708,7 @@ __declspec(dllexport) int __stdcall IsSupported(const char* filename, int dw)
 	}
 	else
 		dw = *(int*)dw;
-	return (dw & 0xffffff) == *(int*)"UCI";
+	return ((int)dw & 0xffffff) == *(int*)"UCI";
 }
 
 __declspec(dllexport) int __stdcall GetPictureInfo(const char* filename, int len, unsigned flag, PictureInfo* pi)

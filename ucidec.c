@@ -111,7 +111,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 		{
 			for(i = 0; i < srclen - 16; )
 			{
-				int ii = fread(src + 16 + i, 1, srclen - 16 - i, stdin);
+				int ii = (int)fread(src + 16 + i, 1, srclen - 16 - i, stdin);
 				if(ii <= 0)
 				{
 					fwprintf(stderr, L"ERROR: can't read stdin\n");
@@ -124,7 +124,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 		{
 			for(i = 0; i < srclen - 16 + 4;)
 			{
-				int ii = fread(src + 16 + i, 1, srclen - 16 + 4 - i, stdin);
+				int ii = (int)fread(src + 16 + i, 1, srclen - 16 + 4 - i, stdin);
 				if(ii <= 0)
 				{
 					fwprintf(stderr, L"ERROR: can't read stdin\n");
@@ -142,7 +142,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 			i += srclen + 4;
 			for(srclen += 4; srclen < i;)
 			{
-				int ii = fread(src + srclen, 1, i - srclen, stdin);
+				int ii = (int)fread(src + srclen, 1, i - srclen, stdin);
 				if(ii <= 0)
 				{
 					fwprintf(stderr, L"ERROR: can't read stdin\n");

@@ -3,6 +3,9 @@ void ff_frame_thread_encoder_init() {}
 void ff_get_cpu_flags_aarch64() {}
 void ff_get_cpu_flags_arm() {}
 void ff_get_cpu_flags_ppc() {}
+void ff_get_cpu_max_align_aarch64() {}
+void ff_get_cpu_max_align_arm() {}
+void ff_get_cpu_max_align_ppc() {}
 void ff_get_unscaled_swscale_aarch64() {}
 void ff_get_unscaled_swscale_arm() {}
 void ff_get_unscaled_swscale_ppc() {}
@@ -42,9 +45,14 @@ void ff_vdpau_h264_picture_start() {}
 void ff_vdpau_h264_set_reference_frames() {}
 void ff_videodsp_init_aarch64() {}
 void ff_videodsp_init_arm() {}
+void ff_videodsp_init_mips() {}
 void ff_videodsp_init_ppc() {}
 void ff_yuv2rgb_init_ppc() {}
 void ff_yuv2rgb_init_tables_ppc() {}
+
+void ff_hevc_dsp_init_ppc() {}
+
+#ifndef _WIN64
 
 void ff_hevc_h_loop_filter_luma_10_avx() {}
 void ff_hevc_h_loop_filter_luma_10_sse2() {}
@@ -55,6 +63,14 @@ void ff_hevc_h_loop_filter_luma_12_ssse3() {}
 void ff_hevc_h_loop_filter_luma_8_avx() {}
 void ff_hevc_h_loop_filter_luma_8_sse2() {}
 void ff_hevc_h_loop_filter_luma_8_ssse3() {}
+void ff_hevc_idct_16x16_10_avx() {}
+void ff_hevc_idct_16x16_10_sse2() {}
+void ff_hevc_idct_16x16_8_avx() {}
+void ff_hevc_idct_16x16_8_sse2() {}
+void ff_hevc_idct_32x32_10_avx() {}
+void ff_hevc_idct_32x32_10_sse2() {}
+void ff_hevc_idct_32x32_8_avx() {}
+void ff_hevc_idct_32x32_8_sse2() {}
 void ff_hevc_put_hevc_bi_epel_h12_10_sse4() {}
 void ff_hevc_put_hevc_bi_epel_h12_12_sse4() {}
 void ff_hevc_put_hevc_bi_epel_h12_8_sse4() {}
@@ -1120,11 +1136,5 @@ void ff_hevc_v_loop_filter_luma_12_ssse3() {}
 void ff_hevc_v_loop_filter_luma_8_avx() {}
 void ff_hevc_v_loop_filter_luma_8_sse2() {}
 void ff_hevc_v_loop_filter_luma_8_ssse3() {}
-void ff_hevc_idct_16x16_8_avx() {}
-void ff_hevc_idct_16x16_10_sse2() {}
-void ff_hevc_idct_32x32_10_avx() {}
-void ff_hevc_idct_16x16_10_avx() {}
-void ff_hevc_idct_32x32_10_sse2() {}
-void ff_hevc_idct_16x16_8_sse2() {}
-void ff_hevc_idct_32x32_8_avx() {}
-void ff_hevc_idct_32x32_8_sse2() {}
+
+#endif

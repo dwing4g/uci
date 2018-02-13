@@ -136,7 +136,7 @@ public:
 	}
 	Buffer& operator<<(const char *s) //写缓冲区(1字节)
 	{
-		write((U8*)s,strlen(s));
+		write((U8*)s, (U32)strlen(s));
 		return *this;
 	}
 	Buffer& operator>>(U8& c) //读缓冲区(1字节)

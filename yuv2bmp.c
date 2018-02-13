@@ -161,7 +161,7 @@ int __cdecl wmain(int argc, wchar_t** argv)
 		_setmode(_fileno(stdin), _O_BINARY);
 		for(i = 0; i < srclen; )
 		{
-			int ii = fread(src + i, 1, srclen - i, stdin);
+			int ii = (int)fread(src + i, 1, srclen - i, stdin);
 			if(ii <= 0) { fwprintf(stderr, L"ERROR: can't read stdin\n"); ret = -12; goto end_; }
 			i += ii;
 		}

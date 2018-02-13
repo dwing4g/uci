@@ -1,4 +1,4 @@
-﻿UCI (Ultra Compact Image) 0.602 by dwing 2017-06-08
+﻿UCI (Ultra Compact Image) 0.61 by dwing 2018-02-13
 
 
 * 简介
@@ -15,7 +15,7 @@ UCI是一种基于H.264/HEVC intra帧压缩算法和数据流格式的静态图�
 
 
 * 文件
-ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe/x265.exe作为编码内核,可在x264.nl/x265.ru网站上下载到最新版本)
+ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe/x265.exe作为编码内核,可在x264.nl和msystem.waw.pl/x265/网站上下载到最新版本)
 ucidec.exe  --- 解码工具,支持UCI=>BMP的转换(需要ucidec.dll内核)
 ucidec.dll  --- 解码内核,可用于二次开发
                 改名为Xuci.usr并放入XnView的Plugins目录中即可作为XnView读取UCI图像的插件
@@ -51,13 +51,13 @@ void __stdcall UCIDebug(int level);
 
 * 其它说明
 
-+ 所有相关工具和解码包以32位i686级别编译, 即支持Intel Pentium Pro和AMD Duron以上级别的CPU, ucidec.dll仅支持用于32位应用程序
-+ 理论上uci支持64位编译, 但尚未测试. 外部工具x264/x265可以使用32/64位版本, 与uci的位数无关
++ 所有相关工具和解码包以32位(i686级别)和64位编译, 即支持Intel Pentium Pro和AMD Duron以上级别的CPU, ucidec.dll仅支持用于32位应用程序, ucidec64.dll仅支持用于64位应用程序
++ 外部工具x264/x265可以使用32/64位版本, 与uci的位数无关
 + 所有相关工具由于使用unicode的系统接口,且使用VC2017编译, 因此仅支持WindowsXP以上版本的系统
 + 由于当前编解码内核所限,此程序所支持图像的宽高是有上限的, 目前已知宽高均在8192之内没有问题,还没做大量测试证明宽高过高的情况
 + 编码输出YUV420格式时宽高会向偶数扩展
 + 由于当前官方x265源码有bug,在windows下的标准输出非二进制模式,导致输出到标准输出的编码数据有误,解码会输出严重错误的图像,
-  因此UCI二进制发布包附带修正过的x265.exe(x265.ru提供的最新VC32位8-bit版本)
+  因此UCI二进制发布包附带修正过的x265.exe(msystem.waw.pl/x265/提供的最新VC32位8-bit版本)
 + x264可在http://download.videolan.org/pub/x264/binaries/下载, 为方便使用可改名为x264.exe
 
 
@@ -83,6 +83,7 @@ void __stdcall UCIDebug(int level);
 
 * 更新历史(以下版本的UCI格式及解码器均向后兼容)
 
+0.61 (2018-02-13) 更新FFmpeg至3.4.2,使用MinGW-GCC 7.3和VC2017(15.5.6)编译,默认二进制发布版本使用VC2017编译(发布附带x265 8-bit 2.6+37),增加64位编译版本
 0.602(2017-06-08) 更新FFmpeg至3.3.2,使用MinGW-GCC 7.1和VC2017编译,默认二进制发布版本使用VC2017编译(发布附带x265 8-bit 2.4+14)
 0.601(2016-12-21) 更新FFmpeg至3.2.2,调整x265默认编码参数(发布附带x265 8-bit 2.1+69)
 0.6  (2016-10-10) 更新FFmpeg至3.1.4,支持x265编码,支持VC2015编译,默认二进制发布版本使用VC2015编译(发布附带x265 8-bit 2.1+20)
