@@ -8,12 +8,14 @@ rem jdk: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 rem ffmpeg: git://source.ffmpeg.org/ffmpeg.git
 rem ./configure --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-decoder=hevc --enable-lto --disable-debug --disable-dxva2 --disable-iconv
 rem ffbuild/config.mak: -O3 => -Ofast -ffat-lto-objects
+rem config.h: #define HAVE_BCRYPT 1 => 0
 rem ./configure --toolchain=msvc --arch=x86 --enable-asm --enable-x86asm --disable-shared --enable-static --cpu=i686 --disable-all --enable-swscale-alpha --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-pthreads --disable-w32threads --disable-os2threads --disable-network --disable-dct --disable-dwt --disable-lsp --disable-lzo --disable-mdct --disable-rdft --disable-fft --disable-everything --enable-avcodec --enable-avutil --enable-swscale --enable-decoder=h264 --enable-decoder=hevc --enable-lto --disable-debug --disable-dxva2 --disable-iconv
 rem ffbuild/config.mak: -O2 => -O2 -Ob2 -Oi -Ot -Oy -GF -GS- -MT; -flto => -GL / -LTCG
+rem config.h: #define HAVE_BCRYPT 1 => 0
 
 set MINGW_HOME=C:\mingw
-set FFMPEG_HOME=C:\ffmpeg-3.4.2
-rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_162
+set FFMPEG_HOME=C:\ffmpeg-4.1
+rem set JAVA_HOME=C:\jdk-11.0.1
 
 set GCCEXE=%MINGW_HOME%\bin\gcc.exe
 set GPPEXE=%MINGW_HOME%\bin\g++.exe

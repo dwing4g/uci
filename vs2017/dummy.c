@@ -24,6 +24,7 @@ void ff_h264qpel_init_aarch64() {}
 void ff_h264qpel_init_arm() {}
 void ff_h264qpel_init_mips() {}
 void ff_h264qpel_init_ppc() {}
+void ff_hevc_dsp_init_arm() {}
 void ff_hevc_dsp_init_mips() {}
 void ff_hevc_pred_init_mips() {}
 void ff_hevcdsp_init_arm() {}

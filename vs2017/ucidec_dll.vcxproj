@@ -72,7 +72,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_162\include;C:\Program Files\Java\jdk1.8.0_162\include\win32;C:\ffmpeg-3.4.2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\jdk-11.0.1\include;C:\jdk-11.0.1\include\win32;C:\ffmpeg-4.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,7 +101,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.8.0_162\include;C:\Program Files\Java\jdk1.8.0_162\include\win32;C:\ffmpeg-3.4.2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\jdk-11.0.1\include;C:\jdk-11.0.1\include\win32;C:\ffmpeg-4.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
