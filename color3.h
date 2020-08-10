@@ -42,8 +42,8 @@ __forceinline void BGR_YUV420_F_10(U8* const dst[3], const int stride_d[3], cons
 			dst_y[stride_y	  ] = BGR_Y(b, g, r); u += BGR_U(b, g, r); v += BGR_V(b, g, r);
 			b = src_s[stride_s + 3]; g = src_s[stride_s + 4]; r = src_s[stride_s + 5];
 			dst_y[stride_y + 1] = BGR_Y(b, g, r); u += BGR_U(b, g, r); v += BGR_V(b, g, r);
-			dst_u[0] = (U16)((u+2) / 4);
-			dst_v[0] = (U16)((v+2) / 4);
+			dst_u[0] = (U16)((u+2) >> 2);
+			dst_v[0] = (U16)((v+2) >> 2);
 
 			src_s += 6;
 			dst_y += 2;
@@ -83,8 +83,8 @@ __forceinline void BGRA_YUVA420_F_10(U8* const dst[4], const int stride_d[4], co
 			dst_y[stride_y	  ] = BGR_Y(b, g, r); u += BGR_U(b, g, r); v += BGR_V(b, g, r);
 			b = src_s[stride_s + 4]; g = src_s[stride_s + 5]; r = src_s[stride_s + 6]; dst_a[stride_a + 1] = src_s[stride_s + 7];
 			dst_y[stride_y + 1] = BGR_Y(b, g, r); u += BGR_U(b, g, r); v += BGR_V(b, g, r);
-			dst_u[0] = (U16)((u+2) / 4);
-			dst_v[0] = (U16)((v+2) / 4);
+			dst_u[0] = (U16)((u+2) >> 2);
+			dst_v[0] = (U16)((v+2) >> 2);
 
 			src_s += 8;
 			dst_y += 2;
@@ -175,8 +175,8 @@ __forceinline void YUV420_BGR_F_10(void* dst, int stride_d, const U8* const src[
 		{
 			u1 = src_u[0] + src_u[stride_u] * 3;
 			v1 = src_v[0] + src_v[stride_u] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -184,8 +184,8 @@ __forceinline void YUV420_BGR_F_10(void* dst, int stride_d, const U8* const src[
 
 			u0 = src_u[1] + src_u[stride_u+1] * 3;
 			v0 = src_v[1] + src_v[stride_u+1] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[3] = YUV_B(y, u, v);
 			dst_d[4] = YUV_G(y, u, v);
@@ -210,8 +210,8 @@ __forceinline void YUV420_BGR_F_10(void* dst, int stride_d, const U8* const src[
 		{
 			u1 = src_u[stride_u] * 3 + src_u[stride_u*2];
 			v1 = src_v[stride_u] * 3 + src_v[stride_u*2];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -219,8 +219,8 @@ __forceinline void YUV420_BGR_F_10(void* dst, int stride_d, const U8* const src[
 
 			u0 = src_u[stride_u+1] * 3 + src_u[stride_u*2+1];
 			v0 = src_v[stride_u+1] * 3 + src_v[stride_u*2+1];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[3] = YUV_B(y, u, v);
 			dst_d[4] = YUV_G(y, u, v);
@@ -264,8 +264,8 @@ __forceinline void YUVA420_BGRA_F_10(void* dst, int stride_d, const U8* const sr
 		{
 			u1 = src_u[0] + src_u[stride_u] * 3;
 			v1 = src_v[0] + src_v[stride_u] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -274,8 +274,8 @@ __forceinline void YUVA420_BGRA_F_10(void* dst, int stride_d, const U8* const sr
 
 			u0 = src_u[1] + src_u[stride_u+1] * 3;
 			v0 = src_v[1] + src_v[stride_u+1] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[4] = YUV_B(y, u, v);
 			dst_d[5] = YUV_G(y, u, v);
@@ -303,8 +303,8 @@ __forceinline void YUVA420_BGRA_F_10(void* dst, int stride_d, const U8* const sr
 		{
 			u1 = src_u[stride_u] * 3 + src_u[stride_u*2];
 			v1 = src_v[stride_u] * 3 + src_v[stride_u*2];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -313,8 +313,8 @@ __forceinline void YUVA420_BGRA_F_10(void* dst, int stride_d, const U8* const sr
 
 			u0 = src_u[stride_u+1] * 3 + src_u[stride_u*2+1];
 			v0 = src_v[stride_u+1] * 3 + src_v[stride_u*2+1];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[4] = YUV_B(y, u, v);
 			dst_d[5] = YUV_G(y, u, v);
@@ -359,8 +359,8 @@ __forceinline void YUV420_BGRA_F_10(void* dst, int stride_d, const U8* const src
 		{
 			u1 = src_u[0] + src_u[stride_u] * 3;
 			v1 = src_v[0] + src_v[stride_u] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -368,8 +368,8 @@ __forceinline void YUV420_BGRA_F_10(void* dst, int stride_d, const U8* const src
 
 			u0 = src_u[1] + src_u[stride_u+1] * 3;
 			v0 = src_v[1] + src_v[stride_u+1] * 3;
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[4] = YUV_B(y, u, v);
 			dst_d[5] = YUV_G(y, u, v);
@@ -394,8 +394,8 @@ __forceinline void YUV420_BGRA_F_10(void* dst, int stride_d, const U8* const src
 		{
 			u1 = src_u[stride_u] * 3 + src_u[stride_u*2];
 			v1 = src_v[stride_u] * 3 + src_v[stride_u*2];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[0];
 			dst_d[0] = YUV_B(y, u, v);
 			dst_d[1] = YUV_G(y, u, v);
@@ -403,8 +403,8 @@ __forceinline void YUV420_BGRA_F_10(void* dst, int stride_d, const U8* const src
 
 			u0 = src_u[stride_u+1] * 3 + src_u[stride_u*2+1];
 			v0 = src_v[stride_u+1] * 3 + src_v[stride_u*2+1];
-			u = (u0 + u1 * 3 + 8) / 16;
-			v = (v0 + v1 * 3 + 8) / 16;
+			u = (u0 + u1 * 3 + 8) >> 4;
+			v = (v0 + v1 * 3 + 8) >> 4;
 			y = src_y[1];
 			dst_d[4] = YUV_B(y, u, v);
 			dst_d[5] = YUV_G(y, u, v);

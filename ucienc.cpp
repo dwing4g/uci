@@ -603,7 +603,7 @@ extern "C" int __cdecl wmain(int argc, wchar_t** argv)
 		{
 			dstlen /= 2;
 			for(i = 0; i < dstlen; ++i)
-				dst0[i] = (U8)(((U16*)dst0)[i] >> 2);
+				dst0[i] = (U8)((((U16*)dst0)[i] + 2) >> 2);
 			if(!WriteFile(hfile, dst0, dstlen, (DWORD*)&i, 0) || i != dstlen) { fwprintf(stderr, L"ERROR: can't write dst file\n"); ret = -42; goto end_; }
 		}
 		goto end_;
