@@ -100,7 +100,7 @@ __declspec(dllexport) int __stdcall UCIDecode(
 	if(width ) *width  = w;
 	if(height) *height = h;
 	if(bit	 ) *bit    = b;
-	if(stride) *stride = (m == 1 ? w : (w+7)&0xfffffff8) * (b/8);
+	if(stride) *stride = (m == 1 ? w : (w+0xf)&0xfffffff0) * (b/8);
 	if(!dst) return 0;
 	if(srclen < 12 + 4) return -5;
 	ww = w + (w & ((m & 1) ^ 1));
@@ -345,7 +345,7 @@ static int __stdcall UCIDecode4XnView(
 	if(width ) *width  = w;
 	if(height) *height = h;
 	if(bit	 ) *bit    = b;
-	if(stride) *stride = (m == 1 ? w : (w+7)&0xfffffff8) * (b/8);
+	if(stride) *stride = (m == 1 ? w : (w+0xf)&0xfffffff0) * (b/8);
 	if(!dst) return 0;
 	if(srclen < 12 + 4) return -5;
 	ww = w + (w & ((m & 1) ^ 1));
