@@ -1,4 +1,4 @@
-﻿UCI (Ultra Compact Image) 0.611 by dwing 2018-11-08
+﻿UCI (Ultra Compact Image) 0.612 by dwing 2020-12-25
 
 
 * 简介
@@ -15,7 +15,7 @@ UCI是一种基于H.264/HEVC intra帧压缩算法和数据流格式的静态图�
 
 
 * 文件
-ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe/x265.exe作为编码内核,可在x264.nl和msystem.waw.pl/x265/网站上下载到最新版本)
+ucienc.exe  --- 编码工具,支持BMP=>UCI的转换(需要在当前目录能够访问到x264.exe/x265.exe作为编码内核,可在 http://msystem.waw.pl/x265/ 下载到最新版本)
 ucidec.exe  --- 解码工具,支持UCI=>BMP的转换(需要ucidec.dll内核)
 ucidec.dll  --- 解码内核,可用于二次开发
                 改名为Xuci.usr并放入XnView的Plugins目录中即可作为XnView读取UCI图像的插件
@@ -82,6 +82,7 @@ void __stdcall UCIDebug(int level);
 
 * 更新历史(以下版本的UCI格式及解码器均向后兼容)
 
+0.612(2020-12-25) 更新FFmpeg至4.3.x,使用MinGW-GCC 9.3和VC2019(16.8.3)编译,默认二进制发布版本使用VC2019编译
 0.611(2018-11-08) 更新FFmpeg至4.1  ,使用MinGW-GCC 8.2和VC2017(15.8.9)编译,默认二进制发布版本使用VC2017编译(不再附带x265)
 0.61 (2018-02-13) 更新FFmpeg至3.4.2,使用MinGW-GCC 7.3和VC2017(15.5.6)编译,默认二进制发布版本使用VC2017编译(发布附带x265 8-bit 2.6+37),增加64位编译版本
 0.602(2017-06-08) 更新FFmpeg至3.3.2,使用MinGW-GCC 7.1和VC2017编译,默认二进制发布版本使用VC2017编译(发布附带x265 8-bit 2.4+14)

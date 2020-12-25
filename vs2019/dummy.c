@@ -52,6 +52,9 @@ void ff_yuv2rgb_init_ppc() {}
 void ff_yuv2rgb_init_tables_ppc() {}
 
 void ff_hevc_dsp_init_ppc() {}
+void ff_get_cpu_flags_mips() {}
+void ff_get_cpu_max_align_mips() {}
+void rgb2rgb_init_aarch64() {}
 
 #ifndef _WIN64
 
